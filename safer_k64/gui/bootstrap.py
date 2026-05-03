@@ -4,6 +4,15 @@ from __future__ import annotations
 
 
 def main() -> int:
+    # До импорта GUI с matplotlib: иначе на macOS часто выбирается MacOSX и открывается второе окно графика.
+    try:
+        import matplotlib
+
+        matplotlib.use("QtAgg", force=True)
+        matplotlib.rcParams["figure.raise_window"] = False
+    except ImportError:
+        pass
+
     try:
         from PySide6.QtWidgets import QApplication
 

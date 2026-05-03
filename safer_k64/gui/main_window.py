@@ -427,6 +427,13 @@ class MainWindow(QMainWindow):
         v.setSpacing(10)
         v.addWidget(self._title("Файлы"))
         v.addWidget(self._subtitle("Шифрование и расшифрование бинарных файлов (дополнение PKCS#7)."))
+        v.addWidget(
+            self._subtitle(
+                "Вход / Выход: при шифровании вход — открытый файл, выход — шифр. "
+                "При расшифровке вход — только файл шифра (результат шифрования), выход — куда записать данные. "
+                "Не подставляйте исходный текст во вход расшифровки."
+            )
+        )
 
         self.ed_fin = QLineEdit()
         self.ed_fout = QLineEdit()

@@ -25,8 +25,12 @@ class SaferK64ApplicationService:
         return bytes(out)
 
     def decrypt_text(self, ciphertext: bytes, key_hex: str, num_rounds: int) -> str:
+        if ciphertext.startswith(b"\xef\xbb\xbf"):
+            ciphertext = ciphertext[3:]
         if len(ciphertext) % 8 != 0:
-            raise ValueError("Длина шифротекста должна быть кратна 8 байт")
+            raise ValueError(
+                "Длина шифротекста должна быть кратна 8 байт (проверьте hex: чётное число символов, без лишних пробелов)."
+            )
         key = validate_key_hex(key_hex)
         rk = self._schedule.expand(key, num_rounds)
         blocks: list[list[int]] = []
@@ -51,8 +55,18 @@ class SaferK64ApplicationService:
 
     def decrypt_file(self, input_path: Path, output_path: Path, key_hex: str, num_rounds: int) -> None:
         data = Path(input_path).read_bytes()
+        # Блокнот Windows при «Сохранить как UTF-8» может дописать BOM к бинарнику — ломает кратность 8.
+        if data.startswith(b"\xef\xbb\xbf"):
+            data = data[3:]
         if len(data) % 8 != 0:
-            raise ValueError("Длина файла не кратна 8")
+            raise ValueError(
+                "Длина входного файла не кратна 8 байт — это не сырой шифр SAFER K-64.\n\n"
+                "Частые причины:\n"
+                "• Во «Вход» для расшифровки указан исходный открытый текст, а нужен файл с шифром "
+                "(тот, что получили на выходе при шифровании).\n"
+                "• Файл шифра открывали в текстовом редакторе и сохранили — могли добавиться символы (например BOM).\n\n"
+                f"Сейчас размер файла: {len(data)} байт."
+            )
         key = validate_key_hex(key_hex)
         rk = self._schedule.expand(key, num_rounds)
         blocks = [list(data[i : i + 8]) for i in range(0, len(data), 8)]

@@ -53,6 +53,10 @@ class AttackComparisonWidget(QWidget):
         self._resize_timer.timeout.connect(self._on_resize_debounced)
 
         try:
+            import matplotlib
+
+            matplotlib.use("QtAgg", force=True)
+
             from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
             from matplotlib.figure import Figure
 

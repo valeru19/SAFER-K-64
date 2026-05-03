@@ -9,6 +9,11 @@
 
 from __future__ import annotations
 
+import os
+
+# На macOS без этого matplotlib часто берёт бэкенд MacOSX и открывает второе окно графика.
+os.environ.setdefault("MPLBACKEND", "QtAgg")
+
 from safer_k64.gui.bootstrap import main
 
 
