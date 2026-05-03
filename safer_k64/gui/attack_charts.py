@@ -114,10 +114,24 @@ class AttackComparisonWidget(QWidget):
             self._canvas.draw_idle()
 
     def _sync_figure_size(self) -> None:
+        """Синхронизация размера фигуры с виджетом канваса.
+
+        На macOS Retina (и др. HiDPI) ширина/высота Qt — логические пиксели; matplotlib
+        в FigureCanvasQTAgg.resizeEvent задаёт fig.set_size_inches((w*dpr)/dpi, ...).
+        Старый вариант w/dpi без DPR перезаписывал размер и давал «двойные»/битые графики.
+        """
         if not self._mpl_ok or self._canvas is None or self._fig is None:
             return
-        w, h = max(self._canvas.width(), 120), max(self._canvas.height(), 140)
-        self._fig.set_size_inches(w / self._fig.dpi, h / self._fig.dpi)
+        w = max(self._canvas.width(), 120)
+        h = max(self._canvas.height(), 140)
+        dpi = float(self._fig.dpi)
+        try:
+            dpr = float(self._canvas.devicePixelRatioF())
+        except Exception:
+            dpr = 1.0
+        dpr = max(1.0, dpr)
+        # Как в matplotlib.backends.backend_qt.FigureCanvasQT.resizeEvent
+        self._fig.set_size_inches((w * dpr) / dpi, (h * dpr) / dpi, forward=False)
 
     def _fonts_for_canvas(self) -> dict[str, int]:
         h = max(self._canvas.height(), 220) if self._canvas else 400

@@ -14,6 +14,9 @@ def main() -> int:
         pass
 
     try:
+        import sys
+
+        from PySide6.QtCore import Qt
         from PySide6.QtWidgets import QApplication
 
         from safer_k64.gui.main_window import MainWindow
@@ -24,6 +27,8 @@ def main() -> int:
             f"Причина: {e}"
         )
         return 1
+    if sys.platform == "darwin":
+        QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
     app = QApplication([])
     app.setApplicationName("SAFER K-64 Lab")
     w = MainWindow()
